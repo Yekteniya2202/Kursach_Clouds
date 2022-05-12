@@ -72,10 +72,13 @@ namespace DotNetCoreSqlDb.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (var target = new MemoryStream())
+                if (river.CountryFile != null)
                 {
-                    river.CountryFile.CopyTo(target);
-                    river.Country = target.ToArray();
+                    using (var target = new MemoryStream())
+                    {
+                        river.CountryFile.CopyTo(target);
+                        river.Country = target.ToArray();
+                    }
                 }
                 _context.Add(river);
                 await _context.SaveChangesAsync();
@@ -116,11 +119,14 @@ namespace DotNetCoreSqlDb.Controllers
             {
                 try
                 {
-                    using (var target = new MemoryStream())
+                    if (river.CountryFile != null)
                     {
+                        using (var target = new MemoryStream())
+                        {
 
-                        river.CountryFile.CopyTo(target);
-                        river.Country = target.ToArray();
+                            river.CountryFile.CopyTo(target);
+                            river.Country = target.ToArray();
+                        }
                     }
                     _context.Update(river);
                     await _context.SaveChangesAsync();
