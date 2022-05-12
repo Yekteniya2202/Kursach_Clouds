@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.ComponentModel.DataAnnotations;
-
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DotNetCoreSqlDb.Models
 {
@@ -12,6 +13,10 @@ namespace DotNetCoreSqlDb.Models
         public int Length { get; set; }
         public int Square { get; set; }
         public string Ocean { get; set; }
+      
+        [NotMapped]
+        public IFormFile CountryFile { get; set; } 
+        public byte[] Country { get; set; }
 
     }
 }

@@ -24,6 +24,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Ocean)
             </th>
+            <th>
+                @Html.DisplayNameFor(model  => model.Country)
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -40,6 +43,21 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem  => item.Ocean)
+            </td>
+            <td>
+                @{ 
+                    //byte[] arr = modelItem => item.Logo;
+                    var base64 = "";
+                    var imgSrc = "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAQCAIAAAB7ihFwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEsSURBVFhH7ZhPDkQwFIfnIJY9jZWzWMxZJI4ijsINZiEW0kRi/HkdXlOPqhGtfvmt2j7afghencdyeoV5HbDPL2HaQtdAm0RzV8DqDNqX8HgeIAcfzRg8VTJ4qtQagSKtlmPiHNqXZO95QMCqpIT2dajNEaGmSmYq9AoF7iiERE0xdJMK5X3hRdmK8B3uTdHYUI01QrBC/cuU2hwpUAHIhZv3wJkKdW9fU6xSuGlCcJpCVsXvuk+IGp+n8PAatU0I1DpQ8NFWFSrjlkIyXuGtFcJUy2Z8xkCh+nXm8BqpQhLtQq/wSoVwRimG7r1C9xTC629ueDIbFGIufJAeLlSiUDjWmF4vbiokczuFPHH3o+IZCoE9Jpz+wfbPzRGhpkpmKvQKBTYr9NhM130Bg6JR+0Sv6f4AAAAASUVORK5CYII=";
+
+                    if (item.Country != null)
+                    {
+                        base64 = Convert.ToBase64String(item.Country);
+                        imgSrc = String.Format("data:image/jpeg;base64,{0}", base64);
+                    }
+                }
+                @*@Html.DisplayFor(modelItem => item.Logo)*@
+                <img src="@imgSrc" alt="Alternate Text" style="width: 100px; height: auto"/>
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

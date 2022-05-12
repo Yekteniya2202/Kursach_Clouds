@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DotNetCoreSqlDb.Models;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace DotNetCoreSqlDb.Controllers
 {
@@ -26,6 +28,7 @@ namespace DotNetCoreSqlDb.Controllers
             try
             {
                 rivers = await _context.River.ToListAsync();
+                
             }
             catch (Exception e)
             {
@@ -65,10 +68,15 @@ namespace DotNetCoreSqlDb.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Length,Square,Ocean")] River river)
+        public async Task<IActionResult> Create([Bind("ID,Name,Length,Square,Ocean,CountryFile")] River river)
         {
             if (ModelState.IsValid)
             {
+                using (var target = new MemoryStream())
+                {
+                    river.CountryFile.CopyTo(target);
+                    river.Country = target.ToArray();
+                }
                 _context.Add(river);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -97,7 +105,7 @@ namespace DotNetCoreSqlDb.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Length,Square,Ocean")] River river)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Length,Square,Ocean,CountryFile")] River river)
         {
             if (id != river.ID)
             {
@@ -108,6 +116,12 @@ namespace DotNetCoreSqlDb.Controllers
             {
                 try
                 {
+                    using (var target = new MemoryStream())
+                    {
+
+                        river.CountryFile.CopyTo(target);
+                        river.Country = target.ToArray();
+                    }
                     _context.Update(river);
                     await _context.SaveChangesAsync();
                 }
