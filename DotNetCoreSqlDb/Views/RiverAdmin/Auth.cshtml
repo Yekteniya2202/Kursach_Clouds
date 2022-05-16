@@ -1,0 +1,17 @@
+﻿@model DotNetCoreSqlDb.Models.RiverAdmin
+
+@{
+    ViewData["Title"] = "Auth";
+}
+
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Auth" method="post">
+            <div class="form-group">
+                <label asp-for="Password" class="control-label">Enter admin password</label>
+                <input asp-for="Password" class="form-control" type="password" />
+            </div>
+        </form>
+    </div>
+</div>

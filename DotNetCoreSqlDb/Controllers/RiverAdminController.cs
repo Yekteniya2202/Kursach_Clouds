@@ -6,35 +6,61 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DotNetCoreSqlDb.Models;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace DotNetCoreSqlDb.Controllers
 {
-    public class TodosController : Controller
+    public class RiverAdminController : Controller
     {
-        private readonly MyDatabaseContext _context;
-
-        public TodosController(MyDatabaseContext context)
+        private readonly RiverDatabaseContext _context;
+        static bool _isAdmin = false;
+        public RiverAdminController(RiverDatabaseContext context)
         {
+            
             _context = context;
         }
-
-        // GET: Todos
+        // GET: RiverController
         public async Task<IActionResult> Index()
         {
-            var todos = new List<Todo>();
+            if (_isAdmin == false)
+            {
+                return View("Auth");
+            }
+            var rivers = new List<River>();
 
             // This allows the home page to load if migrations have not been run yet.
             try
             {
-                todos = await _context.Todo.ToListAsync();
+                rivers = await _context.River.ToListAsync();
+
             }
             catch (Exception e)
             {
 
-                return View(todos);
+                return View(rivers);
             }
 
-            return View(todos);
+            return View(rivers);
+        }
+
+        [HttpPost]
+        public IActionResult Auth([Bind("Password")] RiverAdmin admin)
+        {
+            if (admin.Password == "admin")
+            {
+                _isAdmin = true;
+                return RedirectToAction("Index");
+            }
+            return View("Auth");
+            
+        }
+
+        public IActionResult Logout()
+        {
+            _isAdmin = false;
+           return View("Auth");
+            
         }
 
         // GET: Todos/Details/5
@@ -45,14 +71,14 @@ namespace DotNetCoreSqlDb.Controllers
                 return NotFound();
             }
 
-            var todo = await _context.Todo
+            var river = await _context.River
                 .FirstOrDefaultAsync(m => m.ID == id);
-            if (todo == null)
+            if (river == null)
             {
                 return NotFound();
             }
 
-            return View(todo);
+            return View(river);
         }
 
         // GET: Todos/Create
@@ -61,20 +87,30 @@ namespace DotNetCoreSqlDb.Controllers
             return View();
         }
 
+
+        
         // POST: Todos/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Description,CreatedDate")] Todo todo)
+        public async Task<IActionResult> Create([Bind("ID,Name,Length,Square,Ocean,CountryFile")] River river)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(todo);
+                if (river.CountryFile != null)
+                {
+                    using (var target = new MemoryStream())
+                    {
+                        river.CountryFile.CopyTo(target);
+                        river.Country = target.ToArray();
+                    }
+                }
+                _context.Add(river);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(todo);
+            return View(river);
         }
 
         // GET: Todos/Edit/5
@@ -85,12 +121,12 @@ namespace DotNetCoreSqlDb.Controllers
                 return NotFound();
             }
 
-            var todo = await _context.Todo.FindAsync(id);
-            if (todo == null)
+            var river = await _context.River.FindAsync(id);
+            if (river == null)
             {
                 return NotFound();
             }
-            return View(todo);
+            return View(river);
         }
 
         // POST: Todos/Edit/5
@@ -98,9 +134,9 @@ namespace DotNetCoreSqlDb.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Description,CreatedDate")] Todo todo)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Length,Square,Ocean,CountryFile")] River river)
         {
-            if (id != todo.ID)
+            if (id != river.ID)
             {
                 return NotFound();
             }
@@ -109,12 +145,21 @@ namespace DotNetCoreSqlDb.Controllers
             {
                 try
                 {
-                    _context.Update(todo);
+                    if (river.CountryFile != null)
+                    {
+                        using (var target = new MemoryStream())
+                        {
+
+                            river.CountryFile.CopyTo(target);
+                            river.Country = target.ToArray();
+                        }
+                    }
+                    _context.Update(river);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TodoExists(todo.ID))
+                    if (!TodoExists(river.ID))
                     {
                         return NotFound();
                     }
@@ -125,7 +170,7 @@ namespace DotNetCoreSqlDb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(todo);
+            return View(river);
         }
 
         // GET: Todos/Delete/5
@@ -136,14 +181,14 @@ namespace DotNetCoreSqlDb.Controllers
                 return NotFound();
             }
 
-            var todo = await _context.Todo
+            var river = await _context.River
                 .FirstOrDefaultAsync(m => m.ID == id);
-            if (todo == null)
+            if (river == null)
             {
                 return NotFound();
             }
 
-            return View(todo);
+            return View(river);
         }
 
         // POST: Todos/Delete/5
@@ -151,15 +196,15 @@ namespace DotNetCoreSqlDb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var todo = await _context.Todo.FindAsync(id);
-            _context.Todo.Remove(todo);
+            var river = await _context.River.FindAsync(id);
+            _context.River.Remove(river);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool TodoExists(int id)
         {
-            return _context.Todo.Any(e => e.ID == id);
+            return _context.River.Any(e => e.ID == id);
         }
     }
 }
