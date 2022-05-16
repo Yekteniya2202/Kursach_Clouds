@@ -14,7 +14,6 @@ namespace DotNetCoreSqlDb.Controllers
     public class RiverAdminController : Controller
     {
         private readonly RiverDatabaseContext _context;
-        static bool _isAdmin = false;
         static string _id = "";
         public RiverAdminController(RiverDatabaseContext context)
         {
@@ -28,7 +27,7 @@ namespace DotNetCoreSqlDb.Controllers
             string other_id = "";
             bool contains_coockie = HttpContext.Request.Cookies.TryGetValue("id", out other_id);
 
-            if (_isAdmin == false || _id != other_id)
+            if (_id != other_id)
             {
                 return View("Auth");
             }
@@ -62,7 +61,6 @@ namespace DotNetCoreSqlDb.Controllers
         {
             if (admin.Password == "admin")
             {
-                _isAdmin = true;
                 _id = RandomString(20);
                 HttpContext.Response.Cookies.Append("id", _id);
                 return RedirectToAction("Index");
@@ -73,7 +71,8 @@ namespace DotNetCoreSqlDb.Controllers
 
         public IActionResult Logout()
         {
-            _isAdmin = false;
+            HttpContext.Response.Cookies.Delete("id");
+            _id = RandomString(20);
            return View("Auth");
             
         }
@@ -83,6 +82,7 @@ namespace DotNetCoreSqlDb.Controllers
         {
             if (id == null)
             {
+
                 return NotFound();
             }
 
