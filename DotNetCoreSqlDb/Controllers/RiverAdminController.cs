@@ -15,15 +15,20 @@ namespace DotNetCoreSqlDb.Controllers
     {
         private readonly RiverDatabaseContext _context;
         static bool _isAdmin = false;
+        static string _id = "";
         public RiverAdminController(RiverDatabaseContext context)
         {
             
             _context = context;
         }
+
         // GET: RiverController
         public async Task<IActionResult> Index()
         {
-            if (_isAdmin == false)
+            string other_id = "";
+            bool contains_coockie = HttpContext.Request.Cookies.TryGetValue("id", out other_id);
+
+            if (_isAdmin == false || _id != other_id)
             {
                 return View("Auth");
             }
@@ -44,12 +49,22 @@ namespace DotNetCoreSqlDb.Controllers
             return View(rivers);
         }
 
+        private static Random random = new Random();
+        public static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
         [HttpPost]
         public IActionResult Auth([Bind("Password")] RiverAdmin admin)
         {
             if (admin.Password == "admin")
             {
                 _isAdmin = true;
+                _id = RandomString(20);
+                HttpContext.Response.Cookies.Append("id", _id);
                 return RedirectToAction("Index");
             }
             return View("Auth");
